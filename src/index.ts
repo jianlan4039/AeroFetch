@@ -27,7 +27,7 @@ export interface HttpClient {
 }
 
 
-export class DefaultHttpClient implements HttpClient {
+export class AeroFetch implements HttpClient {
     private defaults: Partial<Omit<HttpRequestConfig, 'url' | 'method'>> = {};
     private interceptor?: HttpInterceptor;
 
@@ -133,4 +133,4 @@ export class DefaultHttpClient implements HttpClient {
     }
 }
 
-export default DefaultHttpClient;
+export default AeroFetch;
