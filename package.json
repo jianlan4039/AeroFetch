@@ -2,8 +2,8 @@
   "name": "aerofetch",
   "version": "0.0.0",
   "description": "AeroFetch is a sleek, lightweight, and powerful HTTP client built on the Fetch API, designed to make web requests faster, smoother, and more intuitive. Just like aerodynamics optimizes speed and efficiency, AeroFetch streamlines API calls with a clean, modern interface while maintaining full flexibility for developers.",
-  "main": "index.js",
-  "types": "./src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
@@ -18,6 +18,7 @@
   ],
   "author": "jian lan",
   "license": "Apache-2.0",
+  "files": ["dist"],
   "bugs": {
     "url": "https://github.com/jianlan4039/AeroFetch/issues"
   },

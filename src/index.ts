@@ -9,38 +9,54 @@ export interface HttpRequestConfig {
 }
 
 // Interface for interceptors
-export interface HttpInterceptor {
+export interface RequestInterceptor {
     request?(config: HttpRequestConfig): HttpRequestConfig | Promise<HttpRequestConfig>;
+}
+
+export interface ResponseInterceptor {
     response?(response: any): any | Promise<any>;
+}
+
+export interface ResponseErrorInterceptor {
     responseError?(error: any): any | Promise<any>;
 }
 
+export type HttpInterceptor = RequestInterceptor & ResponseInterceptor & ResponseErrorInterceptor;
+
 // Interface for HTTP client
 export interface HttpClient {
-    get<T = any>(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T>;
-    post<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T>;
-    put<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T>;
-    delete<T = any>(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T>;
-    patch<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T>;
-    setInterceptor(interceptor: HttpInterceptor): void;
-    setDefaults(defaults: Partial<Omit<HttpRequestConfig, 'url' | 'method'>>): void; // Add this line
+    get(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any>;
+    post(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any>;
+    put(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any>;
+    delete(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any>;
+    patch(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any>;
+    setRequestInterceptor(interceptor: RequestInterceptor): void;
+    setResponseInterceptor(interceptor: ResponseInterceptor): void;
+    setResponseErrorInterceptor(interceptor: ResponseErrorInterceptor): void;
+    setDefaults(defaults: Partial<Omit<HttpRequestConfig, 'url' | 'method'>>): void;
 }
 
-
+// Implementation of the HTTP client using Fetch API
 export class AeroFetch implements HttpClient {
     private defaults: Partial<Omit<HttpRequestConfig, 'url' | 'method'>> = {};
-    private interceptor?: HttpInterceptor;
+    private interceptor: HttpInterceptor = {};
 
-    setInterceptor(interceptor: HttpInterceptor): void {
-        this.interceptor = interceptor;
+    setRequestInterceptor(interceptor: RequestInterceptor): void {
+        throw new Error("Method not implemented.");
+    }
+    setResponseInterceptor(interceptor: ResponseInterceptor): void {
+        throw new Error("Method not implemented.");
+    }
+    setResponseErrorInterceptor(interceptor: ResponseErrorInterceptor): void {
+        throw new Error("Method not implemented.");
     }
 
     setDefaults(defaults: Partial<Omit<HttpRequestConfig, 'url' | 'method'>>): void {
         this.defaults = { ...this.defaults, ...defaults };
     }
 
-    private async request<T>(config: HttpRequestConfig): Promise<T> {
-        let finalConfig = { ...this.defaults, ...config };
+    private async request(config: HttpRequestConfig): Promise<any> {
+        let finalConfig = { ...this.defaults, ...config }; 
 
         // Apply request interceptor
         if (this.interceptor?.request) {
@@ -84,7 +100,11 @@ export class AeroFetch implements HttpClient {
             try {
                 data = await response.json();
             } catch (error) {
-                throw new Error('Failed to parse JSON response: ' + error.message);
+                if (error instanceof Error) {
+                    throw new Error('Failed to parse JSON response: ' + error.message);
+                } else {
+                    throw new Error('Failed to parse JSON response: Unknown error');
+                }
             }
         } else {
             data = await response.text();
@@ -94,7 +114,6 @@ export class AeroFetch implements HttpClient {
             if (this.interceptor?.responseError) {
                 return await this.interceptor.responseError(data);
             }
-            throw data;
         }
 
         // Apply response interceptor
@@ -112,24 +131,24 @@ export class AeroFetch implements HttpClient {
         return data;
     }
 
-    get<T = any>(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T> {
-        return this.request<T>({ ...config, url, method: 'GET' });
+    get(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any> {
+        return this.request({ ...config, url, method: 'GET' });
     }
 
-    post<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T> {
-        return this.request<T>({ ...config, url, data, method: 'POST' });
+    post(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any> {
+        return this.request({ ...config, url, data, method: 'POST' });
     }
 
-    put<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T> {
-        return this.request<T>({ ...config, url, data, method: 'PUT' });
+    put(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any> {
+        return this.request({ ...config, url, data, method: 'PUT' });
     }
 
-    delete<T = any>(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T> {
-        return this.request<T>({ ...config, url, method: 'DELETE' });
+    delete(url: string, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any> {
+        return this.request({ ...config, url, method: 'DELETE' });
     }
 
-    patch<T = any>(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<T> {
-        return this.request<T>({ ...config, url, data, method: 'PATCH' });
+    patch(url: string, data?: any, config?: Omit<HttpRequestConfig, 'method' | 'url'>): Promise<any> {
+        return this.request({ ...config, url, data, method: 'PATCH' });
     }
 }
 
