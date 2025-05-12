@@ -1,35 +1,24 @@
-interface IRequestInterceptor {
-    intercept(url: string | URL, options?: RequestInit): RequestInit
-}
-
-interface IResponseInterceptor {
-    intercept<R = any>(response: Response): R
-}
+type RequestInterceptor = (url: string | URL, options?: RequestInit) => RequestInit;
+type ResponseInterceptor<R = any> = (response: Response) => R;
 
 interface IFetchClient {
-    post<T = any, R = Response>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>
+  post<T = any>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<any>;
 
-    get<R = Response>(url: string | URL, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>
+  get<R = Response>(url: string | URL, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>;
 
-    delete<T = any, R = Response>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>
+  delete(url: string | URL, options?: Omit<RequestInit, 'body' | 'method'>): Promise<any>;
 
-    put<T = any, R = Response>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>
+  put<T = any>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<any>;
 
-    patch<T = any, R = Response>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<R>
+  patch<T = any>(url: string | URL, data?: T, options?: Omit<RequestInit, 'body' | 'method'>): Promise<any>;
 
-    setDefaults(defaults: Partial<Omit<RequestInit, 'body' | 'method'>>): void
+  setDefaults(defaults: Partial<Omit<RequestInit, 'body' | 'method'>>): void;
 
-    setRequestInterceptor(interceptor: IRequestInterceptor): void
+  setRequestInterceptor(interceptor: RequestInterceptor): void;
 
-    setResponseInterceptor(interceptor: IResponseInterceptor): void
+  setResponseInterceptor(interceptor: ResponseInterceptor): void;
 
-    stream(): Promise<string | undefined>
-
-    abort(msg?: string): boolean
+  abort(msg?: string): boolean;
 }
 
-export {
-    IFetchClient,
-    IRequestInterceptor,
-    IResponseInterceptor,
-}
+export { IFetchClient, RequestInterceptor, ResponseInterceptor };
